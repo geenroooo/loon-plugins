@@ -83,9 +83,11 @@ hostname = *.example.com,*.sample.com
 
 公开仓库 `geenroooo/loon-plugins`,推到 GitHub 后 Loon 通过 raw 链接远程引用。改动推送后用户在 Loon 点「更新插件」即可拉到最新(raw 有几分钟 CDN 缓存)。
 
-**节点查询工具箱** (`node-query-toolbox.plugin`) — 把三个脚本打包成一个插件。Loon 远程链接:
+**目录约定:每个插件单独一个文件夹**(插件文件 + 它引用的脚本都放一起),避免混乱。新插件照此新建文件夹。
+
+**节点查询工具箱** (`node-query-toolbox/`) — 把三个脚本打包成一个插件。Loon 远程链接:
 ```
-https://raw.githubusercontent.com/geenroooo/loon-plugins/main/node-query-toolbox.plugin
+https://raw.githubusercontent.com/geenroooo/loon-plugins/main/node-query-toolbox/node-query-toolbox.plugin
 ```
 
 | 脚本 | 作用 | 出处 |
