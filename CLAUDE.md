@@ -79,6 +79,29 @@ hostname = *.example.com,*.sample.com
 - 正则要转义 `.` 为 `\.`,匹配 http 和 https 用 `https?`。
 - 改 JSON 响应用 `JSON.parse($response.body)` → 改 → `$done({body: JSON.stringify(obj)})`。
 
+## 本仓库现状
+
+公开仓库 `geenroooo/loon-plugins`,推到 GitHub 后 Loon 通过 raw 链接远程引用。改动推送后用户在 Loon 点「更新插件」即可拉到最新(raw 有几分钟 CDN 缓存)。
+
+**节点查询工具箱** (`node-query-toolbox.plugin`) — 把三个脚本打包成一个插件。Loon 远程链接:
+```
+https://raw.githubusercontent.com/geenroooo/loon-plugins/main/node-query-toolbox.plugin
+```
+
+| 脚本 | 作用 | 出处 |
+|------|------|------|
+| `net-lsp-x.js` | 入口落地查询(节点入口 IP / 落地 IP) | xream network-info,跨 Surge/QX/Loon/Stash 通用,1500+ 行 |
+| `streaming-ui-check.js` | 流媒体解锁查询(NF/Disney/YTB/ChatGPT 等) | 改自 KOP-XIAO |
+| `geo_location.js` | 地理位置查询 | 改自 KOP-XIAO,最简,可当模板 |
+
+### 关键:这三个是「节点操作脚本」,在 Loon 插件里用 `generic` 类型声明
+Loon 没有专门的 node-action 关键字 —— 这类「选中节点→运行→`$done({title, htmlMessage})` 弹窗」的脚本,在插件里就是写成 `generic`。用户选中某节点运行时,Loon 把该节点通过 `$environment.params.node`(及 `.nodeInfo.address`)传进来;脚本里靠 `isInteraction()`(即 `$environment.params.node` 是否存在)判断当前是不是节点操作模式。请求时带 `node: $environment.params.node` 就走那条线路。
+- 直接在插件列表点(没选节点)= 非交互模式,`net-lsp-x.js` 只显示当前网络信息、没有「入口」段,这是正常的。
+- `img-url` 可用 SF Symbol(如 `globe.asia.australia.system`,`.system` 后缀表示系统符号),不依赖外部图床。
+
+### net-lsp-x.js 的入口解析改动(已上线)
+原脚本解析节点域名拿入口 IP 时,阿里 DNS 解析器(`net-lsp-x.js` 约 1324 行)写死了 `edns_client_subnet: '223.6.6.6/24'`,等于伪装成「阿里云机房」去解析,GeoDNS/CDN 节点会因此返回与用户手机实际连接不同的入口 IP。已删除该行,改回按真实查询来源解析 —— 用户在国内时这样最贴近手机实际连接。脚本仍支持 `DNS` 参数手动切换解析器(`ali`/`cf`/`google`/`tencent`)。本地有 `net-lsp-x.js.bak` 备份(已 gitignore)。
+
 ## References
 
 - 官方插件文档: https://nsloon.app/docs/Plugin/
